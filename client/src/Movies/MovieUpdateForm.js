@@ -1,26 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const initialMovie = {
-  id: '',
-  title: '',
-  director: '',
-  metascore: '',
-  stars: []
-};
-
 const MovieUpdateForm = props => {
-  const [movie, setMovie] = useState([]);
+  const [movie, setMovie] = useState({
+    title: '',
+    director: '',
+    metascore: '',
+    stars: []
+  });
 
-  useEffect(() => {
+  console.log(movie, 'movie');
+
+  const fetchMovie = id => {
     axios
-      .get(`http://localhost:5000/api/movies/${props.match.params.id}`)
+      .get(`http://localhost:5000/api/movies/${id}`)
       .then(res => setMovie(res.data))
       .catch(err => console.log(err.response));
+  };
+
+  useEffect(() => {
+    fetchMovie(props.match.params.id);
   }, [props.match.params.id]);
 
   const changeHandler = ev => {
     setMovie({ ...movie, [ev.target.name]: ev.target.value });
+  };
+
+  const starsOnChangeHandler = index => e => {
+    setMovie({
+      ...movie,
+      stars: movie.stars.map((star, starIndex) => {
+        return starIndex === index ? e.target.value : star;
+      })
+    });
   };
 
   const handleSubmit = e => {
@@ -28,16 +40,10 @@ const MovieUpdateForm = props => {
     axios
       .put(`http://localhost:5000/api/movies/${movie.id}`, movie)
       .then(res => {
-        props.updateMovie(res.data);
+        console.log(res, 'res of handleSubmit');
         props.history.push('/');
       })
       .catch(err => console.log(err.response));
-  };
-
-  const starsOnChangeHandler = (idx, e) => {
-    const updatedStars = [...movie.stars];
-    updatedStars[idx] = e.target.value;
-    setMovie({ ...movie, stars: updatedStars });
   };
 
   return (
@@ -71,17 +77,21 @@ const MovieUpdateForm = props => {
         />
         <div className="baseline" />
 
-        <input
-          type="string"
-          name="stars"
-          onChange={e => starsOnChangeHandler(movie.id, e)}
-          placeholder="Stars"
-          value={movie.stars}
-        />
+        {movie.stars.map((starName, index) => {
+          return (
+            <input
+              type="text"
+              placeholder="star"
+              value={starName}
+              key={index}
+              onChange={starsOnChangeHandler(index)}
+            />
+          );
+        })}
 
         <div className="baseline" />
 
-        <button onSubmit={handleSubmit} className="md-button form-button">
+        <button type="submit" className="md-button form-button">
           Update
         </button>
       </form>
@@ -90,11 +100,3 @@ const MovieUpdateForm = props => {
 };
 
 export default MovieUpdateForm;
-// */
-// {
-//   id: 5,
-//   title: 'Tombstone',
-//   director: 'George P. Cosmatos',
-//   metascore: 89,
-//   stars: ['Kurt Russell', 'Bill Paxton', 'Sam Elliot'],
-// }*/
