@@ -11,6 +11,7 @@ function AddMovie(props) {
 
   const handleSubmit = e => {
     e.preventDefault();
+    movie.stars = [movie.star1, movie.star2, movie.star3];
     axios
       .post('http://localhost:5000/api/movies', movie)
       .then(res => {
@@ -21,7 +22,13 @@ function AddMovie(props) {
   };
 
   const changeHandler = ev => {
-    setMovie(movie);
+    setMovie({ ...movie, [ev.target.name]: ev.target.value });
+    //setMovie({ stars: mystars });
+  };
+
+  const mystars = [];
+  const starHandler = ev => {
+    mystars.push(ev.target.value);
   };
 
   return (
@@ -57,8 +64,22 @@ function AddMovie(props) {
 
         <input
           type="text"
-          placeholder="star"
-          value={movie.stars}
+          placeholder="Star"
+          name="star1"
+          onChange={changeHandler}
+        />
+
+        <input
+          type="text"
+          placeholder="Star"
+          name="star2"
+          onChange={changeHandler}
+        />
+
+        <input
+          type="text"
+          placeholder="Star"
+          name="star3"
           onChange={changeHandler}
         />
 
